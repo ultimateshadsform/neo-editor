@@ -26,19 +26,19 @@ watch(
   }
 );
 
-function handleClose() {
+const handleClose = () => {
   emit('close');
-}
+};
 
-function handleSave() {
+const handleSave = () => {
   emit('updateMouseSensitivity', Number(localMouseSensitivity.value));
   handleClose();
-}
+};
 
-function updateLocalSensitivity(event: Event) {
+const updateLocalSensitivity = (event: Event) => {
   const target = event.target as HTMLInputElement;
   localMouseSensitivity.value = Number(target.value);
-}
+};
 </script>
 
 <template>
