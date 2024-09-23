@@ -23,7 +23,7 @@
     <Transition name="fade">
       <ul
         v-if="hasSubmenu && showSubmenu"
-        class="fixed bg-neutral-200 dark:bg-neutral-800 p-2 border border-neutral-300 dark:border-neutral-700 rounded-md shadow-md max-h-[60vh] overflow-y-auto scrollbar-thin scrollbar-thumb-neutral-400 scrollbar-track-transparent hover:scrollbar-thumb-neutral-500"
+        class="fixed bg-neutral-200 dark:bg-neutral-800 p-2 border border-neutral-300 dark:border-neutral-700 rounded-md shadow-md max-h-[60vh] overflow-y-auto scrollbar-thin scrollbar-track-transparent scrollbar-thumb-neutral-400 dark:scrollbar-thumb-neutral-600 hover:scrollbar-thumb-neutral-500 dark:hover:scrollbar-thumb-neutral-500 scrollbar-thumb-rounded-full"
         ref="submenuRef"
       >
         <ContextMenuItem
@@ -114,7 +114,3 @@ const handleClick = () => {
   emit('action');
 };
 </script>
-
-<style scoped>
-/* Remove the existing scrollbar styles */
-</style>
