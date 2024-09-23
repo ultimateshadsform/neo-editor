@@ -1,0 +1,11 @@
+@use './tw.scss';
+
+html,
+body,
+#app {
+  @apply w-full h-full;
+}
+
+body {
+  @apply bg-neutral-200 dark:bg-neutral-800 text-neutral-900 dark:text-neutral-100;
+}
