@@ -5,15 +5,18 @@ import { useSettingsStore } from '../stores/settings.store';
 import ContextMenu from './ContextMenu.vue';
 import ContextMenuItem from './ContextMenuItem.vue';
 import EditorSettingsModal from './EditorSettingsModal.vue';
+import { menuItems } from '../ts/menu';
 
 const editor = ref<HTMLDivElement | null>(null);
 const cameraSpeed = ref(0.1);
 
-const contextMenu = ref<ComponentPublicInstance<{ handleMenu: (e: MouseEvent) => void }> | null>(
-  null
-);
+const contextMenuRef = ref<InstanceType<typeof ContextMenu> | null>(null);
 
-const handleCtxMenu = (e: MouseEvent) => contextMenu.value?.handleMenu(e);
+const onContextMenu = (e: MouseEvent) => {
+  e.preventDefault();
+  e.stopPropagation();
+  contextMenuRef.value?.handleMenu(e);
+};
 
 const handleBeforeUnload = (e: BeforeUnloadEvent) => {
   e.preventDefault();
@@ -27,16 +30,18 @@ const settingsStore = useSettingsStore();
 const keyState = ref<Record<string, boolean>>({});
 
 onMounted(() => {
+  if (!editor.value) return;
+
   window.addEventListener('beforeunload', handleBeforeUnload);
   const scene = new THREE.Scene();
   const camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.1, 1000);
   const renderer = new THREE.WebGLRenderer({ antialias: true });
   renderer.setSize(window.innerWidth, window.innerHeight);
 
-  editor.value!.appendChild(renderer.domElement);
+  editor.value.appendChild(renderer.domElement);
 
   const mouseState = { x: 0, y: 0 };
-  let pitch = 0; // New: Separate pitch for looking up/down
+  let pitch = 0;
   let isMouseCaptured = false;
 
   function handleKeyDown(event: KeyboardEvent) {
@@ -60,7 +65,6 @@ onMounted(() => {
     mouseState.x -= event.movementX * settingsStore.mouseSensitivity;
     pitch -= event.movementY * settingsStore.mouseSensitivity;
 
-    // Clamp the pitch to prevent over-rotation
     pitch = Math.max(-Math.PI / 2, Math.min(Math.PI / 2, pitch));
   }
 
@@ -81,14 +85,11 @@ onMounted(() => {
   window.addEventListener('mousemove', handleMouseMove);
   document.addEventListener('pointerlockchange', handlePointerLockChange);
 
-  // Position the camera
   camera.position.z = 5;
 
-  // Add ambient light
   const ambientLight = new THREE.AmbientLight(0xffffff, 0.5);
   scene.add(ambientLight);
 
-  // Add directional light
   const directionalLight = new THREE.DirectionalLight(0xffffff, 0.5);
   directionalLight.position.set(1, 1, 1);
   scene.add(directionalLight);
@@ -97,8 +98,8 @@ onMounted(() => {
   const skyboxGeometry = new THREE.BoxGeometry(1000, 1000, 1000);
   const skyboxMaterial = new THREE.ShaderMaterial({
     uniforms: {
-      topColor: { value: new THREE.Color(0x0077ff) }, // Sky blue
-      bottomColor: { value: new THREE.Color(0x626262) } // Dark grey
+      topColor: { value: new THREE.Color(0x0077ff) },
+      bottomColor: { value: new THREE.Color(0x626262) }
     },
     vertexShader: `
       varying vec3 vWorldPosition;
@@ -123,7 +124,6 @@ onMounted(() => {
   const skybox = new THREE.Mesh(skyboxGeometry, skyboxMaterial);
   scene.add(skybox);
 
-  // Add a cube to the scene for reference
   const geometry = new THREE.BoxGeometry();
   const material = new THREE.MeshBasicMaterial({ color: 0x00ff00 });
   const cube = new THREE.Mesh(geometry, material);
@@ -136,14 +136,11 @@ onMounted(() => {
   scene.add(cube2);
 
   const animate = function () {
-    // Update camera rotation
     camera.rotation.y = mouseState.x;
-    camera.rotation.order = 'YXZ'; // Ensure correct rotation order
+    camera.rotation.order = 'YXZ';
 
-    // Apply pitch rotation to camera
     camera.rotation.x = pitch;
 
-    // Calculate forward and right vectors based on camera's Y rotation only
     const forward = new THREE.Vector3(
       -Math.sin(camera.rotation.y),
       0,
@@ -151,10 +148,8 @@ onMounted(() => {
     );
     const right = new THREE.Vector3(Math.cos(camera.rotation.y), 0, -Math.sin(camera.rotation.y));
 
-    // Calculate current move speed
-    const currentMoveSpeed = cameraSpeed.value; // Updated: use reactive speed
+    const currentMoveSpeed = cameraSpeed.value;
 
-    // Move camera
     if (keyState.value['w']) camera.position.addScaledVector(forward, currentMoveSpeed);
     if (keyState.value['s']) camera.position.addScaledVector(forward, -currentMoveSpeed);
     if (keyState.value['a']) camera.position.addScaledVector(right, -currentMoveSpeed);
@@ -162,7 +157,6 @@ onMounted(() => {
     if (keyState.value['space']) camera.position.y += currentMoveSpeed;
     if (keyState.value['shift']) camera.position.y -= currentMoveSpeed;
 
-    // Ensure rotation is within bounds
     camera.rotation.x = Math.max(-Math.PI / 2, Math.min(Math.PI / 2, camera.rotation.x));
 
     cube.rotation.x += 0.01;
@@ -173,117 +167,44 @@ onMounted(() => {
 
   renderer.setAnimationLoop(animate);
 
-  window.addEventListener('resize', () => {
+  const handleResize = () => {
     renderer.setSize(window.innerWidth, window.innerHeight);
     camera.aspect = window.innerWidth / window.innerHeight;
     camera.updateProjectionMatrix();
+  };
+
+  window.addEventListener('resize', handleResize);
+
+  onUnmounted(() => {
+    window.removeEventListener('beforeunload', handleBeforeUnload);
+    window.removeEventListener('keydown', handleKeyDown);
+    window.removeEventListener('keyup', handleKeyUp);
+    window.removeEventListener('mousemove', handleMouseMove);
+    document.removeEventListener('pointerlockchange', handlePointerLockChange);
+    window.removeEventListener('resize', handleResize);
+    renderer.setAnimationLoop(null);
+    editor.value?.removeChild(renderer.domElement);
   });
 });
 
-// Watch for changes in cameraSpeed and ensure it's a number
 watch(cameraSpeed, (newValue) => {
   cameraSpeed.value = Number(newValue);
 });
-
-onUnmounted(() => {
-  window.removeEventListener('beforeunload', handleBeforeUnload);
-});
-
-// New: Define the menu items structure
-interface MenuItem {
-  label: string;
-  action?: () => void;
-  submenu?: MenuItem[];
-}
-
-const menuItems: MenuItem[] = [
-  {
-    label: 'Create object',
-    submenu: [
-      {
-        label: 'Roads',
-        submenu: [
-          {
-            label: 'Simple roads',
-            submenu: [
-              { label: 'Blue road', action: () => console.log('Create Road1') },
-              { label: 'Red road', action: () => console.log('Create Road2') },
-              { label: 'Purple striped road', action: () => console.log('Create SimpleRoad4') },
-              { label: 'Grass road', action: () => console.log('Create GrassRoad') },
-              { label: 'Halloween road', action: () => console.log('Create HalloweenRoad') },
-              { label: 'Ice road', action: () => console.log('Create iceRoad') },
-              { label: 'Galaxy road', action: () => console.log('Create galaxyRoad') },
-              { label: 'Rainbow road', action: () => console.log('Create rainbowRoad') }
-            ]
-          },
-          {
-            label: 'Tunnels',
-            submenu: [
-              {
-                label: 'Purple rectangular tunnel',
-                action: () => console.log('Create TunnelRoad1')
-              },
-              { label: 'Gray round tunnel', action: () => console.log('Create TunnelRoad4') },
-              { label: 'Halloween tunnel', action: () => console.log('Create halloweenTunnel') },
-              { label: 'Galaxy tunnel', action: () => console.log('Create galaxyTunnel') }
-            ]
-          },
-          { label: 'Green platform', action: () => console.log('Create Platform 1') }
-        ]
-      }
-    ]
-  }
-];
 </script>
 
 <template>
-  <div class="overflow-hidden relative">
-    <ContextMenu ref="contextMenu">
+  <div ref="editor" @contextmenu="onContextMenu">
+    <ContextMenu ref="contextMenuRef">
       <ContextMenuItem
         v-for="(item, index) in menuItems"
         :key="index"
         :label="item.label"
+        :icon="item.icon"
         :action="item.action"
         :submenu="item.submenu"
-      >
-        {{ item.label }}
-      </ContextMenuItem>
+        :path="[index.toString()]"
+      />
     </ContextMenu>
-    <div ref="editor" @contextmenu.prevent="handleCtxMenu"></div>
-
-    <!-- New: Camera speed slider -->
-    <div class="absolute top-5 right-5 flex flex-col items-end gap-4">
-      <button
-        @click="showSettingsModal = true"
-        class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
-      >
-        Editor Settings
-      </button>
-      <div class="bg-black bg-opacity-50 p-3 rounded-lg text-white flex flex-col items-center">
-        <label for="camera-speed" class="mb-2">Camera Speed</label>
-        <div class="flex items-center gap-2">
-          <input
-            id="camera-speed"
-            type="range"
-            min="0.01"
-            max="0.2"
-            step="0.01"
-            v-model="cameraSpeed"
-            class="w-40"
-          />
-          <span class="w-12 text-right">{{ cameraSpeed.toFixed(2) }}</span>
-        </div>
-      </div>
-    </div>
-
-    <!-- Add this button to open the settings modal -->
-
-    <!-- Add the EditorSettingsModal component -->
-    <Teleport to="body">
-      <Transition name="fade">
-        <EditorSettingsModal v-if="showSettingsModal" @close="showSettingsModal = false" />
-      </Transition>
-    </Teleport>
   </div>
 </template>
 

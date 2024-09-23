@@ -8,9 +8,7 @@ A level editor for Neodash.
 
 `SPACE` to go up.
 
-`CTRL` to go down.
-
-`SHIFT` to go faster.
+`SHIFT` to go down.
 
 `Z` to toggle the mouse.
 

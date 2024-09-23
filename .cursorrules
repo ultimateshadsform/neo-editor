@@ -18,3 +18,5 @@ You carefully provide accurate, factual, thoughtful answers, and excel at reason
 - ALWAYS use the latest Vue 3 syntax, features, and methods.
 - ALWAYS use the latest Vite, Vitest, and Vue 3 features and best practices.
 - ALWAYS use const syntax for functions instead of function declaration.
+- ALWAYS use tailwind for styling. use the latest tailwind features and best practices.
+- Use scss if tailwind is not enough.

@@ -7,24 +7,30 @@
     ref="menuItemRef"
   >
     <!-- Render the main item content -->
-    <span>
-      <slot>{{ label }}</slot>
-    </span>
+    <div class="flex items-center space-x-3">
+      <img
+        v-if="icon"
+        :src="icon"
+        class="w-8 h-8 rounded-full bg-neutral-200 dark:bg-neutral-700 object-cover flex-shrink-0"
+      />
+      <span class="truncate">{{ label }}</span>
+    </div>
 
     <!-- Add submenu indicator -->
-    <span v-if="hasSubmenu" class="submenu-indicator ml-2">▶</span>
+    <span v-if="hasSubmenu" class="text-xs text-neutral-500 ml-2">▶</span>
 
-    <!-- Render the submenu if it exists and should be shown -->
+    <!-- Update the submenu container classes -->
     <Transition name="fade">
       <ul
         v-if="hasSubmenu && showSubmenu"
-        class="fixed bg-neutral-200 dark:bg-neutral-800 p-2 border border-neutral-300 dark:border-neutral-700 rounded-md shadow-md submenu"
+        class="fixed bg-neutral-200 dark:bg-neutral-800 p-2 border border-neutral-300 dark:border-neutral-700 rounded-md shadow-md max-h-[60vh] overflow-y-auto scrollbar-thin scrollbar-thumb-neutral-400 scrollbar-track-transparent hover:scrollbar-thumb-neutral-500"
         ref="submenuRef"
       >
         <ContextMenuItem
           v-for="(subItem, index) in submenu"
           :key="index"
           :label="subItem.label"
+          :icon="subItem.icon"
           :action="subItem.action"
           :submenu="subItem.submenu"
         >
@@ -36,18 +42,14 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, nextTick, useSlots } from 'vue';
-
-interface MenuItem {
-  label: string;
-  action?: () => void;
-  submenu?: MenuItem[];
-}
+import { ref, computed, nextTick } from 'vue';
+import type { MenuItem } from '@/ts/menu';
 
 const props = defineProps<{
   label: string;
   action?: () => void;
   submenu?: MenuItem[];
+  icon?: string;
 }>();
 
 const emit = defineEmits(['action']);
@@ -55,7 +57,6 @@ const emit = defineEmits(['action']);
 const showSubmenu = ref(false);
 const submenuRef = ref<HTMLElement | null>(null);
 const menuItemRef = ref<HTMLElement | null>(null);
-const slots = useSlots();
 
 // Check if the submenu prop exists
 const hasSubmenu = computed(() => props.submenu && props.submenu.length > 0);
@@ -76,9 +77,18 @@ const adjustSubmenuPosition = () => {
     left = menuItemRect.left - submenuRect.width;
   }
 
-  // If submenu goes below the viewport, move it up
+  // If submenu goes below the viewport, adjust its position
   if (top + submenuRect.height > viewportHeight) {
-    top = Math.max(0, viewportHeight - submenuRect.height);
+    const spaceAbove = menuItemRect.top;
+    const spaceBelow = viewportHeight - menuItemRect.bottom;
+
+    if (spaceAbove > spaceBelow) {
+      // Position above if there's more space
+      top = Math.max(0, menuItemRect.top - submenuRect.height);
+    } else {
+      // Position below, but limit to viewport height
+      top = Math.min(menuItemRect.bottom, viewportHeight - submenuRect.height);
+    }
   }
 
   submenuRef.value.style.position = 'fixed';
@@ -106,12 +116,5 @@ const handleClick = () => {
 </script>
 
 <style scoped>
-.submenu {
-  z-index: 1000;
-}
-
-.submenu-indicator {
-  font-size: 0.8em;
-  color: #888;
-}
+/* Remove the existing scrollbar styles */
 </style>
