@@ -188,55 +188,65 @@ watch(cameraSpeed, (newValue) => {
 onUnmounted(() => {
   window.removeEventListener('beforeunload', handleBeforeUnload);
 });
+
+// New: Define the menu items structure
+interface MenuItem {
+  label: string;
+  action?: () => void;
+  submenu?: MenuItem[];
+}
+
+const menuItems: MenuItem[] = [
+  {
+    label: 'Create object',
+    submenu: [
+      {
+        label: 'Roads',
+        submenu: [
+          {
+            label: 'Simple roads',
+            submenu: [
+              { label: 'Blue road', action: () => console.log('Create Road1') },
+              { label: 'Red road', action: () => console.log('Create Road2') },
+              { label: 'Purple striped road', action: () => console.log('Create SimpleRoad4') },
+              { label: 'Grass road', action: () => console.log('Create GrassRoad') },
+              { label: 'Halloween road', action: () => console.log('Create HalloweenRoad') },
+              { label: 'Ice road', action: () => console.log('Create iceRoad') },
+              { label: 'Galaxy road', action: () => console.log('Create galaxyRoad') },
+              { label: 'Rainbow road', action: () => console.log('Create rainbowRoad') }
+            ]
+          },
+          {
+            label: 'Tunnels',
+            submenu: [
+              {
+                label: 'Purple rectangular tunnel',
+                action: () => console.log('Create TunnelRoad1')
+              },
+              { label: 'Gray round tunnel', action: () => console.log('Create TunnelRoad4') },
+              { label: 'Halloween tunnel', action: () => console.log('Create halloweenTunnel') },
+              { label: 'Galaxy tunnel', action: () => console.log('Create galaxyTunnel') }
+            ]
+          },
+          { label: 'Green platform', action: () => console.log('Create Platform 1') }
+        ]
+      }
+    ]
+  }
+];
 </script>
 
 <template>
   <div class="overflow-hidden relative">
     <ContextMenu ref="contextMenu">
-      <ContextMenuItem>
-        Create Object
-        <template #submenu>
-          <ContextMenuItem>
-            Buildings
-            <template #submenu>
-              <ContextMenuItem @action="() => console.log('Create Wall')">Wall</ContextMenuItem>
-              <ContextMenuItem @action="() => console.log('Create House')">House</ContextMenuItem>
-              <ContextMenuItem @action="() => console.log('Create Skyscraper')"
-                >Skyscraper</ContextMenuItem
-              >
-            </template>
-          </ContextMenuItem>
-          <ContextMenuItem>
-            Infrastructure
-            <template #submenu>
-              <ContextMenuItem @action="() => console.log('Create Road')">Road</ContextMenuItem>
-              <ContextMenuItem @action="() => console.log('Create Bridge')">Bridge</ContextMenuItem>
-              <ContextMenuItem @action="() => console.log('Create Railway')"
-                >Railway</ContextMenuItem
-              >
-            </template>
-          </ContextMenuItem>
-          <ContextMenuItem>
-            Nature
-            <template #submenu>
-              <ContextMenuItem @action="() => console.log('Create Tree')">Tree</ContextMenuItem>
-              <ContextMenuItem @action="() => console.log('Create Lake')">Lake</ContextMenuItem>
-              <ContextMenuItem @action="() => console.log('Create Mountain')"
-                >Mountain</ContextMenuItem
-              >
-            </template>
-          </ContextMenuItem>
-          <ContextMenuItem>
-            Vehicles
-            <template #submenu>
-              <ContextMenuItem @action="() => console.log('Create Car')">Car</ContextMenuItem>
-              <ContextMenuItem @action="() => console.log('Create Bus')">Bus</ContextMenuItem>
-              <ContextMenuItem @action="() => console.log('Create Airplane')"
-                >Airplane</ContextMenuItem
-              >
-            </template>
-          </ContextMenuItem>
-        </template>
+      <ContextMenuItem
+        v-for="(item, index) in menuItems"
+        :key="index"
+        :label="item.label"
+        :action="item.action"
+        :submenu="item.submenu"
+      >
+        {{ item.label }}
       </ContextMenuItem>
     </ContextMenu>
     <div ref="editor" @contextmenu.prevent="handleCtxMenu"></div>
