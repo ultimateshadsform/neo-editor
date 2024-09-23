@@ -1,26 +1,23 @@
 <script setup lang="ts">
 import { ref, watch } from 'vue';
 import { onClickOutside } from '@vueuse/core';
+import { useSettingsStore } from '../stores/settings.store';
 
 const modal = ref<HTMLDivElement | null>(null);
+const settingsStore = useSettingsStore();
 
 onClickOutside(modal, () => {
   handleClose();
 });
 
-const props = defineProps<{
-  mouseSensitivity: number;
-}>();
-
 const emit = defineEmits<{
   (e: 'close'): void;
-  (e: 'updateMouseSensitivity', value: number): void;
 }>();
 
-const localMouseSensitivity = ref(props.mouseSensitivity);
+const localMouseSensitivity = ref(settingsStore.mouseSensitivity);
 
 watch(
-  () => props.mouseSensitivity,
+  () => settingsStore.mouseSensitivity,
   (newValue) => {
     localMouseSensitivity.value = newValue;
   }
@@ -31,7 +28,7 @@ const handleClose = () => {
 };
 
 const handleSave = () => {
-  emit('updateMouseSensitivity', Number(localMouseSensitivity.value));
+  settingsStore.updateMouseSensitivity(Number(localMouseSensitivity.value));
   handleClose();
 };
 

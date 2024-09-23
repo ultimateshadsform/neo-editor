@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import * as THREE from 'three';
 import { onMounted, onUnmounted, ref, watch, type ComponentPublicInstance } from 'vue';
+import { useSettingsStore } from '../stores/settings.store';
 import ContextMenu from './ContextMenu.vue';
 import ContextMenuItem from './ContextMenuItem.vue';
 import EditorSettingsModal from './EditorSettingsModal.vue';
@@ -21,13 +22,9 @@ const handleBeforeUnload = (e: BeforeUnloadEvent) => {
 };
 
 const showSettingsModal = ref(false);
-const mouseSensitivity = ref(0.002);
+const settingsStore = useSettingsStore();
 
 const keyState = ref<Record<string, boolean>>({});
-
-const updateMouseSensitivity = (newValue: number) => {
-  mouseSensitivity.value = newValue;
-};
 
 onMounted(() => {
   window.addEventListener('beforeunload', handleBeforeUnload);
@@ -60,8 +57,8 @@ onMounted(() => {
   function handleMouseMove(event: MouseEvent) {
     if (!isMouseCaptured) return;
 
-    mouseState.x -= event.movementX * mouseSensitivity.value;
-    pitch -= event.movementY * mouseSensitivity.value;
+    mouseState.x -= event.movementX * settingsStore.mouseSensitivity;
+    pitch -= event.movementY * settingsStore.mouseSensitivity;
 
     // Clamp the pitch to prevent over-rotation
     pitch = Math.max(-Math.PI / 2, Math.min(Math.PI / 2, pitch));
@@ -274,12 +271,7 @@ onUnmounted(() => {
     <!-- Add the EditorSettingsModal component -->
     <Teleport to="body">
       <Transition name="fade">
-        <EditorSettingsModal
-          v-if="showSettingsModal"
-          :mouseSensitivity="mouseSensitivity"
-          @close="showSettingsModal = false"
-          @updateMouseSensitivity="updateMouseSensitivity"
-        />
+        <EditorSettingsModal v-if="showSettingsModal" @close="showSettingsModal = false" />
       </Transition>
     </Teleport>
   </div>
