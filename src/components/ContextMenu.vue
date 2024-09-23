@@ -53,7 +53,7 @@ defineExpose({
     <div
       v-show="showContextMenu"
       ref="contextMenu"
-      class="absolute bg-neutral-200 dark:bg-neutral-800 p-1 border border-neutral-300 dark:border-neutral-700 rounded-md shadow-md"
+      class="absolute bg-neutral-200 dark:bg-neutral-800 p-1 border border-neutral-300 dark:border-neutral-700 rounded-md shadow-md z-100"
     >
       <ul class="list-none m-0 p-0">
         <!-- Render passed items -->

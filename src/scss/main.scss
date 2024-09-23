@@ -7,5 +7,5 @@ body,
 }
 
 body {
-  @apply bg-neutral-200 dark:bg-neutral-800 text-neutral-900 dark:text-neutral-100;
+  @apply bg-neutral-200 dark:bg-neutral-800 text-neutral-900 dark:text-neutral-100 overflow-hidden;
 }

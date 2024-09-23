@@ -196,18 +196,19 @@ onMounted(() => {
 </script>
 
 <template>
-  <div ref="editor" @contextmenu="onContextMenu" class="relative">
-    <ContextMenu ref="contextMenuRef">
-      <ContextMenuItem
-        v-for="(item, index) in menuItems"
-        :key="index"
-        :label="item.label"
-        :icon="item.icon"
-        :action="item.action"
-        :submenu="item.submenu"
-        :path="[index.toString()]"
-      />
-    </ContextMenu>
+  <div ref="editor" @contextmenu="onContextMenu">
+    <Teleport to="body">
+      <ContextMenu ref="contextMenuRef">
+        <ContextMenuItem
+          v-for="(item, index) in menuItems"
+          :key="index"
+          :label="item.label"
+          :icon="item.icon"
+          :action="item.action"
+          :submenu="item.submenu"
+        />
+      </ContextMenu>
+    </Teleport>
     <button
       @click="toggleSettingsModal"
       class="bg-white absolute top-4 right-4 dark:bg-neutral-800 p-2 rounded-lg text-neutral-800 dark:text-neutral-200 hover:bg-gray-200 dark:hover:bg-neutral-700 transition-colors"
