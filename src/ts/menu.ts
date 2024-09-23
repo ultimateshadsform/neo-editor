@@ -34,8 +34,22 @@ import StarDecor from '@icons/starsplines.png';
 import Pillar from '@icons/pillar.png';
 import MetalTomb from '@icons/metaltomb.png';
 import CityBulding1 from '@icons/citybuilding1.png';
-import CityProcedural from '@icons/cityprocedural.png';
+import CityBuilding2 from '@icons/citybuilding2.png';
+import CityBuilding3 from '@icons/citybuilding3.png';
 import HoverPanel from '@icons/hoverpanel.png';
+import ThinCityBuilding from '@icons/thinbuilding1.png';
+import Disk from '@icons/disk.png';
+import RockLoop from '@icons/rockloop.png';
+import LoopQuad from '@icons/loopquad.png';
+import TechLoop from '@icons/techloop.png';
+import LargeArch from '@icons/arches.png';
+import StripeCube from '@icons/multicube.png';
+import SimpleCube from '@icons/simplecube.png';
+import Multidisk from '@icons/multidisk.png';
+import HoloLaser from '@icons/hololaser.png';
+import RockBallParticle from '@icons/exploparticle.png';
+import Pumpkin from '@icons/pumpkin.png';
+import Tentacle from '@icons/tentacle.png';
 
 export interface MenuItem {
   label: string;
@@ -155,20 +169,105 @@ export const menuItems: MenuItem[] = [
         submenu: [
           { label: 'Pillar', icon: Pillar, action: () => console.log('Create Pillar') },
           { label: 'Metal tomb', icon: MetalTomb, action: () => console.log('Create MetalTomb') },
-          {
-            label: 'City bulding 1',
-            icon: CityBulding1,
-            action: () => console.log('Create CityBulding1')
-          },
+
           {
             label: 'Hover panel',
             icon: HoverPanel,
             action: () => console.log('Create HoverPanel')
           },
+
           {
-            label: 'City procedural',
-            icon: CityProcedural,
-            action: () => console.log('Create CityProcedural')
+            label: 'Disk',
+            icon: Disk,
+            action: () => console.log('Create Disk')
+          },
+          {
+            label: 'Loops',
+            icon: LoopQuad,
+            submenu: [
+              {
+                label: 'Rock loop',
+                icon: RockLoop,
+                action: () => console.log('Create RockLoop')
+              },
+              {
+                label: 'Loop quad',
+                icon: LoopQuad,
+                action: () => console.log('Create LoopQuad')
+              },
+              {
+                label: 'Tech loop',
+                icon: TechLoop,
+                action: () => console.log('Create TechLoop')
+              }
+            ]
+          },
+          {
+            label: 'Buildings',
+            icon: CityBulding1,
+            submenu: [
+              {
+                label: 'City bulding 1',
+                icon: CityBulding1,
+                action: () => console.log('Create CityBulding1')
+              },
+              {
+                label: 'City building 2',
+                icon: CityBuilding2,
+                action: () => console.log('Create CityBuilding2')
+              },
+              {
+                label: 'City building 3',
+                icon: CityBuilding3,
+                action: () => console.log('Create CityBuilding3')
+              },
+
+              {
+                label: 'Thin city building',
+                icon: ThinCityBuilding,
+                action: () => console.log('Create ThinCityBuilding')
+              }
+            ]
+          },
+          {
+            label: 'Large arches',
+            icon: LargeArch,
+            action: () => console.log('Create LargeArch')
+          },
+          {
+            label: 'Stripe cube',
+            icon: StripeCube,
+            action: () => console.log('Create StripeCube')
+          },
+          {
+            label: 'Simple cube',
+            icon: SimpleCube,
+            action: () => console.log('Create SimpleCube')
+          },
+          {
+            label: 'Multi disk',
+            icon: Multidisk,
+            action: () => console.log('Create Multidisk')
+          },
+          {
+            label: 'Holo laser',
+            icon: HoloLaser,
+            action: () => console.log('Create HoloLaser')
+          },
+          {
+            label: 'Rock ball particle',
+            icon: RockBallParticle,
+            action: () => console.log('Create RockBallParticle')
+          },
+          {
+            label: 'Pumpkin',
+            icon: Pumpkin,
+            action: () => console.log('Create Pumpkin')
+          },
+          {
+            label: 'Tentacle',
+            icon: Tentacle,
+            action: () => console.log('Create Tentacle')
           }
         ]
       }

@@ -9,6 +9,8 @@ import { menuItems } from '../ts/menu';
 
 const editor = ref<HTMLDivElement | null>(null);
 const cameraSpeed = ref(0.1);
+const gridSize = ref(10);
+const gridDivisions = ref(10);
 
 // Add this computed property
 const cameraSpeedDisplay = computed(() => Number(cameraSpeed.value).toFixed(2));
@@ -38,14 +40,18 @@ const toggleSettingsModal = () => {
 
 onMounted(() => {
   if (!editor.value) return;
-
   window.addEventListener('beforeunload', handleBeforeUnload);
+
   const scene = new THREE.Scene();
   const camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.1, 1000);
   const renderer = new THREE.WebGLRenderer({ antialias: true });
   renderer.setSize(window.innerWidth, window.innerHeight);
 
   editor.value.appendChild(renderer.domElement);
+
+  // Add GridHelper
+  const gridHelper = new THREE.GridHelper(gridSize.value, gridDivisions.value);
+  scene.add(gridHelper);
 
   const mouseState = { x: 0, y: 0 };
   let pitch = 0;
