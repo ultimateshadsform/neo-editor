@@ -3,11 +3,16 @@
     @mouseenter="showSubmenuHandler"
     @mouseleave="hideSubmenu"
     @click="handleClick"
-    class="cursor-pointer transition-colors hover:bg-neutral-100 dark:hover:bg-neutral-700 p-2 rounded-md relative min-w-32"
+    class="cursor-pointer transition-colors hover:bg-neutral-100 dark:hover:bg-neutral-700 p-2 rounded-md relative min-w-32 flex justify-between items-center"
     ref="menuItemRef"
   >
     <!-- Render the main item content -->
-    <slot>{{ label }}</slot>
+    <span>
+      <slot>{{ label }}</slot>
+    </span>
+
+    <!-- Add submenu indicator -->
+    <span v-if="hasSubmenu" class="submenu-indicator ml-2">▶</span>
 
     <!-- Render the submenu if it exists and should be shown -->
     <Transition name="fade">
@@ -103,5 +108,10 @@ const handleClick = () => {
 <style scoped>
 .submenu {
   z-index: 1000;
+}
+
+.submenu-indicator {
+  font-size: 0.8em;
+  color: #888;
 }
 </style>
