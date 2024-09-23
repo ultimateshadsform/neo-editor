@@ -1,10 +1,11 @@
 <script setup lang="ts">
 import * as THREE from 'three';
-import { onMounted, onUnmounted, ref, type ComponentPublicInstance } from 'vue';
+import { onMounted, onUnmounted, ref, watch, type ComponentPublicInstance } from 'vue';
 import ContextMenu from './ContextMenu.vue';
 import ContextMenuItem from './ContextMenuItem.vue';
 
 const editor = ref<HTMLDivElement | null>(null);
+const cameraSpeed = ref(0.05);
 
 const contextMenu = ref<ComponentPublicInstance<{ handleMenu: (e: MouseEvent) => void }> | null>(
   null
@@ -27,8 +28,6 @@ onMounted(() => {
 
   editor.value!.appendChild(renderer.domElement);
 
-  const moveSpeed = 0.05;
-  const sprintMultiplier = 2.5; // New: Speed multiplier for sprinting
   const mouseSensitivity = 0.002;
   const keyState: { [key: string]: boolean } = {};
   const mouseState = { x: 0, y: 0 };
@@ -38,7 +37,6 @@ onMounted(() => {
   function handleKeyDown(event: KeyboardEvent) {
     keyState[event.key.toLowerCase()] = true;
     if (event.code === 'Space') keyState['space'] = true;
-    if (event.code === 'ControlLeft' || event.code === 'ControlRight') keyState['ctrl'] = true;
     if (event.code === 'ShiftLeft' || event.code === 'ShiftRight') keyState['shift'] = true;
     if (event.key.toLowerCase() === 'z') {
       toggleMouseCapture();
@@ -48,7 +46,6 @@ onMounted(() => {
   function handleKeyUp(event: KeyboardEvent) {
     keyState[event.key.toLowerCase()] = false;
     if (event.code === 'Space') keyState['space'] = false;
-    if (event.code === 'ControlLeft' || event.code === 'ControlRight') keyState['ctrl'] = false;
     if (event.code === 'ShiftLeft' || event.code === 'ShiftRight') keyState['shift'] = false;
   }
 
@@ -150,7 +147,7 @@ onMounted(() => {
     const right = new THREE.Vector3(Math.cos(camera.rotation.y), 0, -Math.sin(camera.rotation.y));
 
     // Calculate current move speed
-    const currentMoveSpeed = keyState['shift'] ? moveSpeed * sprintMultiplier : moveSpeed;
+    const currentMoveSpeed = cameraSpeed.value; // Updated: use reactive speed
 
     // Move camera
     if (keyState['w']) camera.position.addScaledVector(forward, currentMoveSpeed);
@@ -158,7 +155,7 @@ onMounted(() => {
     if (keyState['a']) camera.position.addScaledVector(right, -currentMoveSpeed);
     if (keyState['d']) camera.position.addScaledVector(right, currentMoveSpeed);
     if (keyState['space']) camera.position.y += currentMoveSpeed;
-    if (keyState['ctrl']) camera.position.y -= currentMoveSpeed;
+    if (keyState['shift']) camera.position.y -= currentMoveSpeed;
 
     // Ensure rotation is within bounds
     camera.rotation.x = Math.max(-Math.PI / 2, Math.min(Math.PI / 2, camera.rotation.x));
@@ -176,6 +173,11 @@ onMounted(() => {
     camera.aspect = window.innerWidth / window.innerHeight;
     camera.updateProjectionMatrix();
   });
+});
+
+// Watch for changes in cameraSpeed and ensure it's a number
+watch(cameraSpeed, (newValue) => {
+  cameraSpeed.value = Number(newValue);
 });
 
 onUnmounted(() => {
@@ -233,6 +235,23 @@ onUnmounted(() => {
       </ContextMenuItem>
     </ContextMenu>
     <div ref="editor" @contextmenu.prevent="handleCtxMenu"></div>
+
+    <!-- New: Camera speed slider -->
+    <div
+      class="absolute top-5 right-5 bg-black bg-opacity-50 p-3 rounded-lg text-white flex flex-col items-center"
+    >
+      <label for="camera-speed" class="mb-2">Camera Speed</label>
+      <input
+        id="camera-speed"
+        type="range"
+        min="0.01"
+        max="0.2"
+        step="0.01"
+        v-model="cameraSpeed"
+        class="w-40 mb-2"
+      />
+      <span>{{ cameraSpeed.toFixed(2) }}</span>
+    </div>
   </div>
 </template>
 
