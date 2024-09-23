@@ -3,9 +3,10 @@ import * as THREE from 'three';
 import { onMounted, onUnmounted, ref, watch, type ComponentPublicInstance } from 'vue';
 import ContextMenu from './ContextMenu.vue';
 import ContextMenuItem from './ContextMenuItem.vue';
+import EditorSettingsModal from './EditorSettingsModal.vue';
 
 const editor = ref<HTMLDivElement | null>(null);
-const cameraSpeed = ref(0.05);
+const cameraSpeed = ref(0.1);
 
 const contextMenu = ref<ComponentPublicInstance<{ handleMenu: (e: MouseEvent) => void }> | null>(
   null
@@ -19,6 +20,15 @@ const handleBeforeUnload = (e: BeforeUnloadEvent) => {
   return e.returnValue;
 };
 
+const showSettingsModal = ref(false);
+const mouseSensitivity = ref(0.002);
+
+const keyState = ref<Record<string, boolean>>({});
+
+const updateMouseSensitivity = (newValue: number) => {
+  mouseSensitivity.value = newValue;
+};
+
 onMounted(() => {
   window.addEventListener('beforeunload', handleBeforeUnload);
   const scene = new THREE.Scene();
@@ -28,32 +38,30 @@ onMounted(() => {
 
   editor.value!.appendChild(renderer.domElement);
 
-  const mouseSensitivity = 0.002;
-  const keyState: { [key: string]: boolean } = {};
   const mouseState = { x: 0, y: 0 };
   let pitch = 0; // New: Separate pitch for looking up/down
   let isMouseCaptured = false;
 
   function handleKeyDown(event: KeyboardEvent) {
-    keyState[event.key.toLowerCase()] = true;
-    if (event.code === 'Space') keyState['space'] = true;
-    if (event.code === 'ShiftLeft' || event.code === 'ShiftRight') keyState['shift'] = true;
+    keyState.value[event.key.toLowerCase()] = true;
+    if (event.code === 'Space') keyState.value['space'] = true;
+    if (event.code === 'ShiftLeft' || event.code === 'ShiftRight') keyState.value['shift'] = true;
     if (event.key.toLowerCase() === 'z') {
       toggleMouseCapture();
     }
   }
 
   function handleKeyUp(event: KeyboardEvent) {
-    keyState[event.key.toLowerCase()] = false;
-    if (event.code === 'Space') keyState['space'] = false;
-    if (event.code === 'ShiftLeft' || event.code === 'ShiftRight') keyState['shift'] = false;
+    keyState.value[event.key.toLowerCase()] = false;
+    if (event.code === 'Space') keyState.value['space'] = false;
+    if (event.code === 'ShiftLeft' || event.code === 'ShiftRight') keyState.value['shift'] = false;
   }
 
   function handleMouseMove(event: MouseEvent) {
     if (!isMouseCaptured) return;
 
-    mouseState.x -= event.movementX * mouseSensitivity;
-    pitch -= event.movementY * mouseSensitivity;
+    mouseState.x -= event.movementX * mouseSensitivity.value;
+    pitch -= event.movementY * mouseSensitivity.value;
 
     // Clamp the pitch to prevent over-rotation
     pitch = Math.max(-Math.PI / 2, Math.min(Math.PI / 2, pitch));
@@ -150,12 +158,12 @@ onMounted(() => {
     const currentMoveSpeed = cameraSpeed.value; // Updated: use reactive speed
 
     // Move camera
-    if (keyState['w']) camera.position.addScaledVector(forward, currentMoveSpeed);
-    if (keyState['s']) camera.position.addScaledVector(forward, -currentMoveSpeed);
-    if (keyState['a']) camera.position.addScaledVector(right, -currentMoveSpeed);
-    if (keyState['d']) camera.position.addScaledVector(right, currentMoveSpeed);
-    if (keyState['space']) camera.position.y += currentMoveSpeed;
-    if (keyState['shift']) camera.position.y -= currentMoveSpeed;
+    if (keyState.value['w']) camera.position.addScaledVector(forward, currentMoveSpeed);
+    if (keyState.value['s']) camera.position.addScaledVector(forward, -currentMoveSpeed);
+    if (keyState.value['a']) camera.position.addScaledVector(right, -currentMoveSpeed);
+    if (keyState.value['d']) camera.position.addScaledVector(right, currentMoveSpeed);
+    if (keyState.value['space']) camera.position.y += currentMoveSpeed;
+    if (keyState.value['shift']) camera.position.y -= currentMoveSpeed;
 
     // Ensure rotation is within bounds
     camera.rotation.x = Math.max(-Math.PI / 2, Math.min(Math.PI / 2, camera.rotation.x));
@@ -237,22 +245,54 @@ onUnmounted(() => {
     <div ref="editor" @contextmenu.prevent="handleCtxMenu"></div>
 
     <!-- New: Camera speed slider -->
-    <div
-      class="absolute top-5 right-5 bg-black bg-opacity-50 p-3 rounded-lg text-white flex flex-col items-center"
-    >
-      <label for="camera-speed" class="mb-2">Camera Speed</label>
-      <input
-        id="camera-speed"
-        type="range"
-        min="0.01"
-        max="0.2"
-        step="0.01"
-        v-model="cameraSpeed"
-        class="w-40 mb-2"
-      />
-      <span>{{ cameraSpeed.toFixed(2) }}</span>
+    <div class="absolute top-5 right-5 flex flex-col items-end gap-4">
+      <button
+        @click="showSettingsModal = true"
+        class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
+      >
+        Editor Settings
+      </button>
+      <div class="bg-black bg-opacity-50 p-3 rounded-lg text-white flex flex-col items-center">
+        <label for="camera-speed" class="mb-2">Camera Speed</label>
+        <div class="flex items-center gap-2">
+          <input
+            id="camera-speed"
+            type="range"
+            min="0.01"
+            max="0.2"
+            step="0.01"
+            v-model="cameraSpeed"
+            class="w-40"
+          />
+          <span class="w-12 text-right">{{ cameraSpeed.toFixed(2) }}</span>
+        </div>
+      </div>
     </div>
+
+    <!-- Add this button to open the settings modal -->
+
+    <!-- Add the EditorSettingsModal component -->
+    <Teleport to="body">
+      <Transition name="fade">
+        <EditorSettingsModal
+          v-if="showSettingsModal"
+          :mouseSensitivity="mouseSensitivity"
+          @close="showSettingsModal = false"
+          @updateMouseSensitivity="updateMouseSensitivity"
+        />
+      </Transition>
+    </Teleport>
   </div>
 </template>
 
-<style lang="scss" scoped></style>
+<style lang="scss" scoped>
+.fade-enter-active,
+.fade-leave-active {
+  @apply transition-opacity duration-300;
+}
+
+.fade-enter-from,
+.fade-leave-to {
+  @apply opacity-0;
+}
+</style>
