@@ -208,52 +208,51 @@ onMounted(() => {
         :path="[index.toString()]"
       />
     </ContextMenu>
-
-    <div class="absolute top-4 right-4 flex flex-col items-end space-y-2">
-      <button
-        @click="toggleSettingsModal"
-        class="bg-white dark:bg-neutral-800 p-2 rounded-lg text-neutral-800 dark:text-neutral-200 hover:bg-gray-200 dark:hover:bg-neutral-700 transition-colors"
+    <button
+      @click="toggleSettingsModal"
+      class="bg-white absolute top-4 right-4 dark:bg-neutral-800 p-2 rounded-lg text-neutral-800 dark:text-neutral-200 hover:bg-gray-200 dark:hover:bg-neutral-700 transition-colors"
+    >
+      <svg
+        xmlns="http://www.w3.org/2000/svg"
+        class="h-6 w-6"
+        fill="none"
+        viewBox="0 0 24 24"
+        stroke="currentColor"
       >
-        <svg
-          xmlns="http://www.w3.org/2000/svg"
-          class="h-6 w-6"
-          fill="none"
-          viewBox="0 0 24 24"
-          stroke="currentColor"
-        >
-          <path
-            stroke-linecap="round"
-            stroke-linejoin="round"
-            stroke-width="2"
-            d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"
-          />
-          <path
-            stroke-linecap="round"
-            stroke-linejoin="round"
-            stroke-width="2"
-            d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
-          />
-        </svg>
-      </button>
-
-      <div class="bg-white dark:bg-neutral-800 p-2 rounded-lg">
-        <label
-          for="cameraSpeed"
-          class="block text-sm font-medium text-neutral-800 dark:text-neutral-200"
-        >
-          Camera Speed
-        </label>
-        <input
-          id="cameraSpeed"
-          v-model.number="cameraSpeed"
-          type="range"
-          min="0.01"
-          max="1"
-          step="0.01"
-          class="w-48"
+        <path
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          stroke-width="2"
+          d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"
         />
-        <span class="text-sm text-gray-500">{{ cameraSpeedDisplay }}</span>
-      </div>
+        <path
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          stroke-width="2"
+          d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
+        />
+      </svg>
+    </button>
+
+    <div
+      class="bg-white absolute bottom-4 right-4 flex items-center space-x-2 dark:bg-neutral-800 p-2 rounded-lg"
+    >
+      <label
+        for="cameraSpeed"
+        class="block text-sm font-medium text-neutral-800 dark:text-neutral-200"
+      >
+        Camera Speed
+      </label>
+      <input
+        id="cameraSpeed"
+        v-model.number="cameraSpeed"
+        type="range"
+        min="0.01"
+        max="1"
+        step="0.01"
+        class="w-48"
+      />
+      <span class="text-sm text-gray-500">{{ cameraSpeedDisplay }}</span>
     </div>
   </div>
 
