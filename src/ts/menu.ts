@@ -50,6 +50,16 @@ import HoloLaser from '@icons/hololaser.png';
 import RockBallParticle from '@icons/exploparticle.png';
 import Pumpkin from '@icons/pumpkin.png';
 import Tentacle from '@icons/tentacle.png';
+import StartLine from '@icons/startline.png';
+import FinishLine from '@icons/finishline.png';
+import Procedural from '@icons/cityprocedural.png';
+import ProceduralRocks from '@icons/rockprocedural.png';
+import EnergyPickup from '@icons/energypickup.png';
+import ShieldPickup from '@icons/shieldpickup.png';
+import EnergyLoop from '@icons/energyloop.png';
+import FogShifter from '@icons/fogshift.png';
+import DirectionPanel from '@icons/dirpanel.png';
+import DangerPanel from '@icons/dangerpanel.png';
 
 export interface MenuItem {
   label: string;
@@ -268,6 +278,74 @@ export const menuItems: MenuItem[] = [
             label: 'Tentacle',
             icon: Tentacle,
             action: () => console.log('Create Tentacle')
+          },
+          {
+            label: 'Direction panel',
+            icon: DirectionPanel,
+            action: () => console.log('Create DirectionPanel')
+          },
+          {
+            label: 'Danger panel',
+            icon: DangerPanel,
+            action: () => console.log('Create DangerPanel')
+          }
+        ]
+      },
+      {
+        label: 'Essentials',
+        icon: StartLine,
+        submenu: [
+          {
+            label: 'Start line',
+            icon: StartLine,
+            action: () => console.log('Create StartLine')
+          },
+          {
+            label: 'Finish line',
+            icon: FinishLine,
+            action: () => console.log('Create FinishLine')
+          }
+        ]
+      },
+      {
+        label: 'Procedural',
+        icon: Procedural,
+        submenu: [
+          {
+            label: 'Procedural city',
+            icon: Procedural,
+            action: () => console.log('Create ProceduralCity')
+          },
+          {
+            label: 'Procedural rocks',
+            icon: ProceduralRocks,
+            action: () => console.log('Create ProceduralRocks')
+          }
+        ]
+      },
+      {
+        label: 'Interactables',
+        icon: EnergyPickup,
+        submenu: [
+          {
+            label: 'Energy pickup',
+            icon: EnergyPickup,
+            action: () => console.log('Create EnergyPickup')
+          },
+          {
+            label: 'Shield pickup',
+            icon: ShieldPickup,
+            action: () => console.log('Create ShieldPickup')
+          },
+          {
+            label: 'Energy loop',
+            icon: EnergyLoop,
+            action: () => console.log('Create EnergyLoop')
+          },
+          {
+            label: 'Fog shifter',
+            icon: FogShifter,
+            action: () => console.log('Create FogShifter')
           }
         ]
       }
