@@ -6,7 +6,11 @@ import {
   MeshStandardMaterial,
   Euler,
   BoxGeometry,
-  MeshBasicMaterial
+  MeshBasicMaterial,
+  BufferGeometry,
+  Material,
+  type NormalBufferAttributes,
+  type Object3DEventMap
 } from 'three';
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 import LaserBase from '@/assets/models/laser_base.glb';
@@ -57,10 +61,11 @@ class BaseObject {
 class LaserTrap extends BaseObject implements SceneObject {
   private readonly _csvName: string;
   private readonly _displayName: string;
-  private _baseModel: () => Object3D;
-  private _beamModel: () => Object3D;
-  private _combinedGroup: () => Group;
-  mesh: Mesh;
+  private _baseModel: Object3D;
+  private _beamModel: Object3D;
+  private _combinedGroup: Group;
+  mesh: Mesh<BufferGeometry<NormalBufferAttributes>, Material | Material[], Object3DEventMap>;
+  update?: ((deltaTime: number) => void) | undefined;
 
   constructor(
     position = new Vector3(0, 0, 0),
@@ -77,31 +82,26 @@ class LaserTrap extends BaseObject implements SceneObject {
     this._csvName = csvName;
     this._displayName = displayName;
 
-    const baseModel = new Object3D();
-    const beamModel = new Object3D();
-    const combinedGroup = new Group();
+    this._baseModel = new Object3D();
+    this._beamModel = new Object3D();
+    this._combinedGroup = new Group();
 
-    this._baseModel = () => baseModel;
-    this._beamModel = () => beamModel;
-    this._combinedGroup = () => combinedGroup;
-
-    // Create a placeholder mesh that represents the LaserTrap
-    const geometry = new BoxGeometry(1, 1, 1);
-    const material = new MeshBasicMaterial({ color: 0xff0000, wireframe: true });
-    const meshObject = new Mesh(geometry, material);
-    this.mesh = meshObject;
+    // Initialize mesh with a temporary geometry
+    const tempGeometry = new BufferGeometry();
+    const tempMaterial = new MeshBasicMaterial({ color: 0xffffff });
+    this.mesh = new Mesh(tempGeometry, tempMaterial);
 
     this.loadModels(baseModelUrl, beamModelUrl);
     this.setBaseModelColor(baseColor.r, baseColor.g, baseColor.b, baseColor.a);
     this.setBeamModelColor(beamColor.r, beamColor.g, beamColor.b, beamColor.a);
 
-    // Apply position, rotation, and scale to the mesh
-    meshObject.position.copy(this.position);
-    meshObject.rotation.copy(this.rotation);
-    meshObject.scale.copy(this.scale);
+    // Apply position, rotation, and scale to the combined group
+    this._combinedGroup.position.copy(this.position);
+    this._combinedGroup.rotation.copy(this.rotation);
+    this._combinedGroup.scale.copy(this.scale);
 
     // Add the combined group to the mesh
-    meshObject.add(combinedGroup);
+    this.mesh.add(this._combinedGroup);
   }
 
   // Getter for csvName
@@ -118,20 +118,20 @@ class LaserTrap extends BaseObject implements SceneObject {
     const loader = new GLTFLoader();
 
     loader.load(baseModelUrl, (gltf: GLTF) => {
-      this._baseModel().copy(gltf.scene);
-      this._combinedGroup().add(this._baseModel());
+      this._baseModel = gltf.scene;
+      this._combinedGroup.add(this._baseModel);
     });
 
     loader.load(beamModelUrl, (gltf: GLTF) => {
-      this._beamModel().copy(gltf.scene);
-      this._combinedGroup().add(this._beamModel());
+      this._beamModel = gltf.scene;
+      this._combinedGroup.add(this._beamModel);
     });
   }
 
   setBaseModelColor(r: number, g: number, b: number, a: number) {
-    this._baseModel().traverse((child) => {
+    this._baseModel.traverse((child) => {
       if (child instanceof Mesh && child.material instanceof MeshStandardMaterial) {
-        child.material.color.setRGB(r, g, b);
+        child.material.color.setRGB(r / 255, g / 255, b / 255);
         child.material.opacity = a;
         child.material.transparent = a < 1.0;
       }
@@ -139,17 +139,17 @@ class LaserTrap extends BaseObject implements SceneObject {
   }
 
   setBeamModelColor(r: number, g: number, b: number, a: number) {
-    this._beamModel().traverse((child) => {
+    this._beamModel.traverse((child) => {
       if (child instanceof Mesh && child.material instanceof MeshStandardMaterial) {
-        child.material.color.setRGB(r, g, b);
+        child.material.color.setRGB(r / 255, g / 255, b / 255);
         child.material.opacity = a;
         child.material.transparent = a < 1.0;
       }
     });
   }
 
-  getCombinedGroup() {
-    return this._combinedGroup();
+  getCombinedGroup(): Group {
+    return this._combinedGroup;
   }
 
   // New static method to add a LaserTrap to the scene
