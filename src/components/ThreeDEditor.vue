@@ -169,9 +169,11 @@ onMounted(() => {
     rotation: new THREE.Euler(0, 0, 0),
     scale: new THREE.Vector3(1, 1, 1),
     mesh: new THREE.Mesh(cubeGeometry, cubeMaterial1),
-    update: function () {
-      this.mesh.rotation.x += 0.01;
-      this.mesh.rotation.y += 0.01;
+    update: function (deltaTime: number) {
+      this.rotation.x += 0.01;
+      this.rotation.y += 0.01;
+      // Apply the rotation to the mesh
+      this.mesh.rotation.copy(this.rotation);
     }
   };
 
@@ -231,15 +233,16 @@ onMounted(() => {
     objects.forEach((obj) => {
       if (obj instanceof LaserTrap) {
         const group = obj.getCombinedGroup();
-        group.position.set(obj.position.x, obj.position.y, obj.position.z);
-        group.rotation.set(obj.rotation.x, obj.rotation.y, obj.rotation.z);
-        group.scale.set(obj.scale.x, obj.scale.y, obj.scale.z);
+        group.position.copy(obj.position);
+        group.rotation.copy(obj.rotation);
+        group.scale.copy(obj.scale);
         group.updateMatrix();
         group.updateMatrixWorld(true);
       } else {
-        obj.mesh.position.set(obj.position.x, obj.position.y, obj.position.z);
-        obj.mesh.rotation.set(obj.rotation.x, obj.rotation.y, obj.rotation.z);
-        obj.mesh.scale.set(obj.scale.x, obj.scale.y, obj.scale.z);
+        obj.mesh.position.copy(obj.position);
+        // Remove this line as we're updating the rotation in the update function
+        // obj.mesh.rotation.copy(obj.rotation);
+        obj.mesh.scale.copy(obj.scale);
         obj.mesh.updateMatrix();
         obj.mesh.updateMatrixWorld(true);
       }
