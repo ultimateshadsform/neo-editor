@@ -34,7 +34,7 @@ onMounted(() => {
     renderer.render(scene, camera);
   };
 
-  animate();
+  renderer.setAnimationLoop(animate);
 
   watch(
     () => props.cameraQuaternion,
