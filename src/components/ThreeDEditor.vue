@@ -5,6 +5,7 @@ import { useSettingsStore } from '../stores/settings.store';
 import ContextMenu from './ContextMenu.vue';
 import ContextMenuItem from './ContextMenuItem.vue';
 import EditorSettingsModal from './EditorSettingsModal.vue';
+import XYZCompass from './XYZCompass.vue';
 import { menuItems } from '../ts/menu';
 
 const editor = ref<HTMLDivElement | null>(null);
@@ -37,6 +38,8 @@ const keyState = ref<Record<string, boolean>>({});
 const toggleSettingsModal = () => {
   showSettingsModal.value = !showSettingsModal.value;
 };
+
+const cameraQuaternion = ref(new THREE.Quaternion());
 
 onMounted(() => {
   if (!editor.value) return;
@@ -154,6 +157,10 @@ onMounted(() => {
 
     camera.rotation.x = pitch;
 
+    // Update camera quaternion
+    camera.updateMatrixWorld();
+    cameraQuaternion.value.setFromRotationMatrix(camera.matrixWorld);
+
     const forward = new THREE.Vector3(
       -Math.sin(camera.rotation.y),
       0,
@@ -261,6 +268,8 @@ onMounted(() => {
       />
       <span class="text-sm text-gray-500">{{ cameraSpeedDisplay }}</span>
     </div>
+
+    <XYZCompass :camera-quaternion="cameraQuaternion" />
   </div>
 
   <Teleport to="body">
