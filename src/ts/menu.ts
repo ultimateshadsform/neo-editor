@@ -63,292 +63,302 @@ import DangerPanel from '@icons/dangerpanel.png';
 
 export interface MenuItem {
   label: string;
-  action?: () => void;
+  action?: (addObject: (type: string) => void) => void;
   submenu?: MenuItem[];
   icon?: string;
 }
 
-export const menuItems: MenuItem[] = [
-  {
-    label: 'Create object',
-    submenu: [
-      {
-        label: 'Simple roads',
-        icon: RedRoad,
-        submenu: [
-          { label: 'Blue road', icon: BlueRoad, action: () => console.log('Create Road1') },
-          { label: 'Red road', icon: RedRoad, action: () => console.log('Create Road2') },
-          {
-            label: 'Purple striped road',
-            icon: PurpleRoad,
-            action: () => console.log('Create SimpleRoad4')
-          },
-          { label: 'Grass road', icon: GrassRoad, action: () => console.log('Create GrassRoad') },
-          {
-            label: 'Halloween road',
-            icon: HalloweenRoad,
-            action: () => console.log('Create HalloweenRoad')
-          },
-          { label: 'Ice road', icon: IceRoad, action: () => console.log('Create iceRoad') },
-          {
-            label: 'Galaxy road',
-            icon: GalaxyRoad,
-            action: () => console.log('Create galaxyRoad')
-          },
-          {
-            label: 'Rainbow road',
-            icon: RainbowRoad,
-            action: () => console.log('Create rainbowRoad')
-          }
-        ]
-      },
-      {
-        label: 'Tunnels',
-        icon: PurpleTunnel,
-        submenu: [
-          {
-            label: 'Purple rectangular tunnel',
-            icon: PurpleTunnel,
-            action: () => console.log('Create TunnelRoad1')
-          },
-          {
-            label: 'Gray round tunnel',
-            icon: GrayTunnel,
-            action: () => console.log('Create TunnelRoad4')
-          },
-          {
-            label: 'Halloween tunnel',
-            icon: HalloweenTunnel,
-            action: () => console.log('Create halloweenTunnel')
-          },
-          {
-            label: 'Galaxy tunnel',
-            icon: GalaxyTunnel,
-            action: () => console.log('Create galaxyTunnel')
-          }
-        ]
-      },
-      {
-        label: 'Green platform',
-        icon: Platform,
-        action: () => console.log('Create Platform 1')
-      },
-      {
-        label: 'Obstacles',
-        icon: SlowZone,
-        submenu: [
-          { label: 'Laser', icon: Laser, action: () => console.log('Create Laser') },
-          { label: 'Laser loop', icon: LaserLoop, action: () => console.log('Create LaserLoop') },
-          { label: 'Spikes', icon: Spikes, action: () => console.log('Create Spikes') },
-          { label: 'Slow zone', icon: SlowZone, action: () => console.log('Create SlowZone') },
-          {
-            label: 'Squash trap',
-            icon: SquashTrap,
-            action: () => console.log('Create SquashTrap')
-          },
-          { label: 'Peg', icon: Peg, action: () => console.log('Create Peg') },
-          { label: 'Ramp', icon: Ramp, action: () => console.log('Create Ramp') },
-          { label: 'Saw', icon: Saw, action: () => console.log('Create Saw') },
-          { label: 'Ball', icon: Ball, action: () => console.log('Create Ball') },
-          { label: 'Spike ball', icon: SpikeBall, action: () => console.log('Create SpikeBall') },
-          { label: 'Piston', icon: Piston, action: () => console.log('Create Piston') },
-          { label: 'Kill zone', icon: KillZone, action: () => console.log('Create KillZone') },
-          { label: 'Rotor', icon: Rotor, action: () => console.log('Create Rotor') },
-          { label: 'Jump pad', icon: JumpPad, action: () => console.log('Create JumpPad') },
-          { label: 'Skull', icon: Skull, action: () => console.log('Create Skull') }
-        ]
-      },
-      {
-        label: 'Curve decors',
-        icon: StarDecor,
-        submenu: [
-          { label: 'Cube spline', icon: CubeDecor, action: () => console.log('Create cubeSpline') },
-          { label: 'Side spline', icon: SideDecor, action: () => console.log('Create sideSpline') },
-          {
-            label: 'Swivel spline',
-            icon: SwivelDecor,
-            action: () => console.log('Create swivelSpline')
-          },
-          { label: 'Bat spline', icon: BatDecor, action: () => console.log('Create batSpline') },
-          { label: 'Star spline', icon: StarDecor, action: () => console.log('Create starSpline') }
-        ]
-      },
-      {
-        label: 'Decors',
-        icon: Pillar,
-        submenu: [
-          { label: 'Pillar', icon: Pillar, action: () => console.log('Create Pillar') },
-          { label: 'Metal tomb', icon: MetalTomb, action: () => console.log('Create MetalTomb') },
+export const createMenuItems = (addObject: (type: string) => void) => ({
+  label: 'Create object',
+  submenu: [
+    {
+      label: 'Simple roads',
+      icon: RedRoad,
+      submenu: [
+        { label: 'Blue road', icon: BlueRoad, action: () => console.log('Create Road1') },
+        { label: 'Red road', icon: RedRoad, action: () => console.log('Create Road2') },
+        {
+          label: 'Purple striped road',
+          icon: PurpleRoad,
+          action: () => console.log('Create SimpleRoad4')
+        },
+        { label: 'Grass road', icon: GrassRoad, action: () => console.log('Create GrassRoad') },
+        {
+          label: 'Halloween road',
+          icon: HalloweenRoad,
+          action: () => console.log('Create HalloweenRoad')
+        },
+        { label: 'Ice road', icon: IceRoad, action: () => console.log('Create iceRoad') },
+        {
+          label: 'Galaxy road',
+          icon: GalaxyRoad,
+          action: () => console.log('Create galaxyRoad')
+        },
+        {
+          label: 'Rainbow road',
+          icon: RainbowRoad,
+          action: () => console.log('Create rainbowRoad')
+        }
+      ]
+    },
+    {
+      label: 'Tunnels',
+      icon: PurpleTunnel,
+      submenu: [
+        {
+          label: 'Purple rectangular tunnel',
+          icon: PurpleTunnel,
+          action: () => console.log('Create TunnelRoad1')
+        },
+        {
+          label: 'Gray round tunnel',
+          icon: GrayTunnel,
+          action: () => console.log('Create TunnelRoad4')
+        },
+        {
+          label: 'Halloween tunnel',
+          icon: HalloweenTunnel,
+          action: () => console.log('Create halloweenTunnel')
+        },
+        {
+          label: 'Galaxy tunnel',
+          icon: GalaxyTunnel,
+          action: () => console.log('Create galaxyTunnel')
+        }
+      ]
+    },
+    {
+      label: 'Green platform',
+      icon: Platform,
+      action: () => console.log('Create Platform 1')
+    },
+    {
+      label: 'Obstacles',
+      icon: SlowZone,
+      submenu: [
+        {
+          label: 'Laser',
+          icon: Laser,
+          action: () => addObject('LaserTrap')
+        },
+        {
+          label: 'Laser loop',
+          icon: LaserLoop,
+          action: () => addObject('LaserLoop')
+        },
+        {
+          label: 'Spikes',
+          icon: Spikes,
+          action: () => addObject('Spikes')
+        },
+        { label: 'Slow zone', icon: SlowZone, action: () => console.log('Create SlowZone') },
+        {
+          label: 'Squash trap',
+          icon: SquashTrap,
+          action: () => console.log('Create SquashTrap')
+        },
+        { label: 'Peg', icon: Peg, action: () => console.log('Create Peg') },
+        { label: 'Ramp', icon: Ramp, action: () => console.log('Create Ramp') },
+        { label: 'Saw', icon: Saw, action: () => console.log('Create Saw') },
+        { label: 'Ball', icon: Ball, action: () => console.log('Create Ball') },
+        { label: 'Spike ball', icon: SpikeBall, action: () => console.log('Create SpikeBall') },
+        { label: 'Piston', icon: Piston, action: () => console.log('Create Piston') },
+        { label: 'Kill zone', icon: KillZone, action: () => console.log('Create KillZone') },
+        { label: 'Rotor', icon: Rotor, action: () => console.log('Create Rotor') },
+        { label: 'Jump pad', icon: JumpPad, action: () => console.log('Create JumpPad') },
+        { label: 'Skull', icon: Skull, action: () => console.log('Create Skull') }
+      ]
+    },
+    {
+      label: 'Curve decors',
+      icon: StarDecor,
+      submenu: [
+        { label: 'Cube spline', icon: CubeDecor, action: () => console.log('Create cubeSpline') },
+        { label: 'Side spline', icon: SideDecor, action: () => console.log('Create sideSpline') },
+        {
+          label: 'Swivel spline',
+          icon: SwivelDecor,
+          action: () => console.log('Create swivelSpline')
+        },
+        { label: 'Bat spline', icon: BatDecor, action: () => console.log('Create batSpline') },
+        { label: 'Star spline', icon: StarDecor, action: () => console.log('Create starSpline') }
+      ]
+    },
+    {
+      label: 'Decors',
+      icon: Pillar,
+      submenu: [
+        { label: 'Pillar', icon: Pillar, action: () => console.log('Create Pillar') },
+        { label: 'Metal tomb', icon: MetalTomb, action: () => console.log('Create MetalTomb') },
 
-          {
-            label: 'Hover panel',
-            icon: HoverPanel,
-            action: () => console.log('Create HoverPanel')
-          },
+        {
+          label: 'Hover panel',
+          icon: HoverPanel,
+          action: () => console.log('Create HoverPanel')
+        },
 
-          {
-            label: 'Disk',
-            icon: Disk,
-            action: () => console.log('Create Disk')
-          },
-          {
-            label: 'Loops',
-            icon: LoopQuad,
-            submenu: [
-              {
-                label: 'Rock loop',
-                icon: RockLoop,
-                action: () => console.log('Create RockLoop')
-              },
-              {
-                label: 'Loop quad',
-                icon: LoopQuad,
-                action: () => console.log('Create LoopQuad')
-              },
-              {
-                label: 'Tech loop',
-                icon: TechLoop,
-                action: () => console.log('Create TechLoop')
-              }
-            ]
-          },
-          {
-            label: 'Buildings',
-            icon: CityBulding1,
-            submenu: [
-              {
-                label: 'City bulding 1',
-                icon: CityBulding1,
-                action: () => console.log('Create CityBulding1')
-              },
-              {
-                label: 'City building 2',
-                icon: CityBuilding2,
-                action: () => console.log('Create CityBuilding2')
-              },
-              {
-                label: 'City building 3',
-                icon: CityBuilding3,
-                action: () => console.log('Create CityBuilding3')
-              },
+        {
+          label: 'Disk',
+          icon: Disk,
+          action: () => console.log('Create Disk')
+        },
+        {
+          label: 'Loops',
+          icon: LoopQuad,
+          submenu: [
+            {
+              label: 'Rock loop',
+              icon: RockLoop,
+              action: () => console.log('Create RockLoop')
+            },
+            {
+              label: 'Loop quad',
+              icon: LoopQuad,
+              action: () => console.log('Create LoopQuad')
+            },
+            {
+              label: 'Tech loop',
+              icon: TechLoop,
+              action: () => console.log('Create TechLoop')
+            }
+          ]
+        },
+        {
+          label: 'Buildings',
+          icon: CityBulding1,
+          submenu: [
+            {
+              label: 'City bulding 1',
+              icon: CityBulding1,
+              action: () => console.log('Create CityBulding1')
+            },
+            {
+              label: 'City building 2',
+              icon: CityBuilding2,
+              action: () => console.log('Create CityBuilding2')
+            },
+            {
+              label: 'City building 3',
+              icon: CityBuilding3,
+              action: () => console.log('Create CityBuilding3')
+            },
 
-              {
-                label: 'Thin city building',
-                icon: ThinCityBuilding,
-                action: () => console.log('Create ThinCityBuilding')
-              }
-            ]
-          },
-          {
-            label: 'Large arches',
-            icon: LargeArch,
-            action: () => console.log('Create LargeArch')
-          },
-          {
-            label: 'Stripe cube',
-            icon: StripeCube,
-            action: () => console.log('Create StripeCube')
-          },
-          {
-            label: 'Simple cube',
-            icon: SimpleCube,
-            action: () => console.log('Create SimpleCube')
-          },
-          {
-            label: 'Multi disk',
-            icon: Multidisk,
-            action: () => console.log('Create Multidisk')
-          },
-          {
-            label: 'Holo laser',
-            icon: HoloLaser,
-            action: () => console.log('Create HoloLaser')
-          },
-          {
-            label: 'Rock ball particle',
-            icon: RockBallParticle,
-            action: () => console.log('Create RockBallParticle')
-          },
-          {
-            label: 'Pumpkin',
-            icon: Pumpkin,
-            action: () => console.log('Create Pumpkin')
-          },
-          {
-            label: 'Tentacle',
-            icon: Tentacle,
-            action: () => console.log('Create Tentacle')
-          },
-          {
-            label: 'Direction panel',
-            icon: DirectionPanel,
-            action: () => console.log('Create DirectionPanel')
-          },
-          {
-            label: 'Danger panel',
-            icon: DangerPanel,
-            action: () => console.log('Create DangerPanel')
-          }
-        ]
-      },
-      {
-        label: 'Essentials',
-        icon: StartLine,
-        submenu: [
-          {
-            label: 'Start line',
-            icon: StartLine,
-            action: () => console.log('Create StartLine')
-          },
-          {
-            label: 'Finish line',
-            icon: FinishLine,
-            action: () => console.log('Create FinishLine')
-          }
-        ]
-      },
-      {
-        label: 'Procedural',
-        icon: Procedural,
-        submenu: [
-          {
-            label: 'Procedural city',
-            icon: Procedural,
-            action: () => console.log('Create ProceduralCity')
-          },
-          {
-            label: 'Procedural rocks',
-            icon: ProceduralRocks,
-            action: () => console.log('Create ProceduralRocks')
-          }
-        ]
-      },
-      {
-        label: 'Interactables',
-        icon: EnergyPickup,
-        submenu: [
-          {
-            label: 'Energy pickup',
-            icon: EnergyPickup,
-            action: () => console.log('Create EnergyPickup')
-          },
-          {
-            label: 'Shield pickup',
-            icon: ShieldPickup,
-            action: () => console.log('Create ShieldPickup')
-          },
-          {
-            label: 'Energy loop',
-            icon: EnergyLoop,
-            action: () => console.log('Create EnergyLoop')
-          },
-          {
-            label: 'Fog shifter',
-            icon: FogShifter,
-            action: () => console.log('Create FogShifter')
-          }
-        ]
-      }
-    ]
-  }
-];
+            {
+              label: 'Thin city building',
+              icon: ThinCityBuilding,
+              action: () => console.log('Create ThinCityBuilding')
+            }
+          ]
+        },
+        {
+          label: 'Large arches',
+          icon: LargeArch,
+          action: () => console.log('Create LargeArch')
+        },
+        {
+          label: 'Stripe cube',
+          icon: StripeCube,
+          action: () => console.log('Create StripeCube')
+        },
+        {
+          label: 'Simple cube',
+          icon: SimpleCube,
+          action: () => console.log('Create SimpleCube')
+        },
+        {
+          label: 'Multi disk',
+          icon: Multidisk,
+          action: () => console.log('Create Multidisk')
+        },
+        {
+          label: 'Holo laser',
+          icon: HoloLaser,
+          action: () => console.log('Create HoloLaser')
+        },
+        {
+          label: 'Rock ball particle',
+          icon: RockBallParticle,
+          action: () => console.log('Create RockBallParticle')
+        },
+        {
+          label: 'Pumpkin',
+          icon: Pumpkin,
+          action: () => console.log('Create Pumpkin')
+        },
+        {
+          label: 'Tentacle',
+          icon: Tentacle,
+          action: () => console.log('Create Tentacle')
+        },
+        {
+          label: 'Direction panel',
+          icon: DirectionPanel,
+          action: () => console.log('Create DirectionPanel')
+        },
+        {
+          label: 'Danger panel',
+          icon: DangerPanel,
+          action: () => console.log('Create DangerPanel')
+        }
+      ]
+    },
+    {
+      label: 'Essentials',
+      icon: StartLine,
+      submenu: [
+        {
+          label: 'Start line',
+          icon: StartLine,
+          action: () => console.log('Create StartLine')
+        },
+        {
+          label: 'Finish line',
+          icon: FinishLine,
+          action: () => console.log('Create FinishLine')
+        }
+      ]
+    },
+    {
+      label: 'Procedural',
+      icon: Procedural,
+      submenu: [
+        {
+          label: 'Procedural city',
+          icon: Procedural,
+          action: () => console.log('Create ProceduralCity')
+        },
+        {
+          label: 'Procedural rocks',
+          icon: ProceduralRocks,
+          action: () => console.log('Create ProceduralRocks')
+        }
+      ]
+    },
+    {
+      label: 'Interactables',
+      icon: EnergyPickup,
+      submenu: [
+        {
+          label: 'Energy pickup',
+          icon: EnergyPickup,
+          action: () => console.log('Create EnergyPickup')
+        },
+        {
+          label: 'Shield pickup',
+          icon: ShieldPickup,
+          action: () => console.log('Create ShieldPickup')
+        },
+        {
+          label: 'Energy loop',
+          icon: EnergyLoop,
+          action: () => console.log('Create EnergyLoop')
+        },
+        {
+          label: 'Fog shifter',
+          icon: FogShifter,
+          action: () => console.log('Create FogShifter')
+        }
+      ]
+    }
+  ]
+});

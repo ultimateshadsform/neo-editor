@@ -10,6 +10,7 @@ export default defineConfig({
   server: {
     port: 3000
   },
+  assetsInclude: ['**/*.glb'],
   resolve: {
     alias: {
       '@': fileURLToPath(new URL('./src', import.meta.url)),

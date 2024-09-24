@@ -1,12 +1,17 @@
 <script setup lang="ts">
 import * as THREE from 'three';
+import type { SceneObject } from '@/types/sceneTypes';
 import { onMounted, onUnmounted, ref, computed, watch } from 'vue';
 import { useSettingsStore } from '../stores/settings.store';
+import { createMenuItems } from '../ts/menu';
+import { LaserTrap } from '@/ts/neogame/objects';
+import { Clock } from 'three';
+import { skyboxVertexShader, skyboxFragmentShader } from '@/ts/shaders';
+
 import ContextMenu from './ContextMenu.vue';
 import ContextMenuItem from './ContextMenuItem.vue';
 import EditorSettingsModal from './EditorSettingsModal.vue';
 import XYZCompass from './XYZCompass.vue';
-import { menuItems } from '../ts/menu';
 
 const editor = ref<HTMLDivElement | null>(null);
 const cameraSpeed = ref(0.1);
@@ -39,20 +44,40 @@ const toggleSettingsModal = () => {
   showSettingsModal.value = !showSettingsModal.value;
 };
 
-const cameraQuaternion = ref(new THREE.Quaternion());
-const camera = ref<THREE.PerspectiveCamera | null>(null);
+const cameraQuaternion = new THREE.Quaternion();
+let camera: THREE.PerspectiveCamera | null = null;
+let scene: THREE.Scene | null = null;
+const objects: SceneObject[] = [];
+const clock = new Clock();
+const addObject = (type: string) => {
+  if (scene && camera) {
+    switch (type) {
+      case 'LaserTrap':
+        LaserTrap.addToScene(scene, camera, objects);
+        break;
+      // Add cases for other object types as needed
+      default:
+        console.log(`Object type ${type} not implemented yet`);
+    }
+  }
+};
+
+// Create menu items with the addObject function
+const menuItems = createMenuItems(addObject);
 
 onMounted(() => {
   if (!editor.value) return;
   window.addEventListener('beforeunload', handleBeforeUnload);
 
-  const scene = new THREE.Scene();
-  camera.value = new THREE.PerspectiveCamera(
+  scene = new THREE.Scene();
+
+  camera = new THREE.PerspectiveCamera(
     settingsStore.fov,
     window.innerWidth / window.innerHeight,
     0.1,
     1000
   );
+
   const renderer = new THREE.WebGLRenderer({ antialias: true });
   renderer.setSize(window.innerWidth, window.innerHeight);
 
@@ -107,7 +132,7 @@ onMounted(() => {
   window.addEventListener('mousemove', handleMouseMove);
   document.addEventListener('pointerlockchange', handlePointerLockChange);
 
-  camera.value.position.z = 5;
+  camera.position.z = 5;
 
   const ambientLight = new THREE.AmbientLight(0xffffff, 0.5);
   scene.add(ambientLight);
@@ -123,87 +148,121 @@ onMounted(() => {
       topColor: { value: new THREE.Color(0x0077ff) },
       bottomColor: { value: new THREE.Color(0x626262) }
     },
-    vertexShader: `
-      varying vec3 vWorldPosition;
-      void main() {
-        vec4 worldPosition = modelMatrix * vec4(position, 1.0);
-        vWorldPosition = worldPosition.xyz;
-        gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
-      }
-    `,
-    fragmentShader: `
-      uniform vec3 topColor;
-      uniform vec3 bottomColor;
-      varying vec3 vWorldPosition;
-      void main() {
-        float h = normalize(vWorldPosition).y;
-        gl_FragColor = vec4(mix(bottomColor, topColor, max(h, 0.0)), 1.0);
-      }
-    `,
+    vertexShader: skyboxVertexShader,
+    fragmentShader: skyboxFragmentShader,
     side: THREE.BackSide
   });
 
   const skybox = new THREE.Mesh(skyboxGeometry, skyboxMaterial);
   scene.add(skybox);
 
-  const geometry = new THREE.BoxGeometry();
-  const material = new THREE.MeshBasicMaterial({ color: 0x00ff00 });
-  const cube = new THREE.Mesh(geometry, material);
-  cube.position.set(2, 0, 0);
-  scene.add(cube);
+  // Create LaserTrap objects
+  const laserTrap1 = new LaserTrap(new THREE.Vector3(10, 2, 0));
 
+  // Create cube objects
   const cubeGeometry = new THREE.BoxGeometry();
-  const cubeMaterial = new THREE.MeshBasicMaterial({ color: 0xff0000 });
-  const cube2 = new THREE.Mesh(cubeGeometry, cubeMaterial);
-  scene.add(cube2);
+  const cubeMaterial1 = new THREE.MeshBasicMaterial({ color: 0x00ff00 });
+  const cubeMaterial2 = new THREE.MeshBasicMaterial({ color: 0xff0000 });
+
+  const cube1: SceneObject = {
+    position: new THREE.Vector3(2, 2, 0),
+    rotation: new THREE.Euler(0, 0, 0),
+    scale: new THREE.Vector3(1, 1, 1),
+    mesh: new THREE.Mesh(cubeGeometry, cubeMaterial1),
+    update: function () {
+      this.mesh.rotation.x += 0.01;
+      this.mesh.rotation.y += 0.01;
+    }
+  };
+
+  const cube2: SceneObject = {
+    position: new THREE.Vector3(-2, 2, 0),
+    rotation: new THREE.Euler(0, 0, 0),
+    scale: new THREE.Vector3(1, 1, 1),
+    mesh: new THREE.Mesh(cubeGeometry, cubeMaterial2)
+  };
+
+  // Add all objects to the array
+  objects.push(laserTrap1, cube1, cube2);
+
+  // Add objects to the scene
+  objects.forEach((obj) => {
+    if (obj instanceof LaserTrap) {
+      scene?.add(obj.getCombinedGroup());
+    } else {
+      scene?.add(obj.mesh);
+    }
+  });
 
   const animate = function () {
-    camera.value!.rotation.y = mouseState.x;
-    camera.value!.rotation.order = 'YXZ';
+    if (!camera || !scene) return;
 
-    camera.value!.rotation.x = pitch;
+    camera.rotation.y = mouseState.x;
+    camera.rotation.order = 'YXZ';
+
+    camera.rotation.x = pitch;
 
     // Update camera quaternion
-    camera.value!.updateMatrixWorld();
-    cameraQuaternion.value.setFromRotationMatrix(camera.value!.matrixWorld);
+    camera.updateMatrixWorld();
+    cameraQuaternion.setFromRotationMatrix(camera.matrixWorld);
 
     const forward = new THREE.Vector3(
-      -Math.sin(camera.value!.rotation.y),
+      -Math.sin(camera.rotation.y),
       0,
-      -Math.cos(camera.value!.rotation.y)
+      -Math.cos(camera.rotation.y)
     );
-    const right = new THREE.Vector3(
-      Math.cos(camera.value!.rotation.y),
-      0,
-      -Math.sin(camera.value!.rotation.y)
-    );
+    const right = new THREE.Vector3(Math.cos(camera.rotation.y), 0, -Math.sin(camera.rotation.y));
 
     const currentMoveSpeed = cameraSpeed.value;
 
-    if (keyState.value['w']) camera.value!.position.addScaledVector(forward, currentMoveSpeed);
-    if (keyState.value['s']) camera.value!.position.addScaledVector(forward, -currentMoveSpeed);
-    if (keyState.value['a']) camera.value!.position.addScaledVector(right, -currentMoveSpeed);
-    if (keyState.value['d']) camera.value!.position.addScaledVector(right, currentMoveSpeed);
-    if (keyState.value['space']) camera.value!.position.y += currentMoveSpeed;
-    if (keyState.value['shift']) camera.value!.position.y -= currentMoveSpeed;
+    if (keyState.value['w']) camera.position.addScaledVector(forward, currentMoveSpeed);
+    if (keyState.value['s']) camera.position.addScaledVector(forward, -currentMoveSpeed);
+    if (keyState.value['a']) camera.position.addScaledVector(right, -currentMoveSpeed);
+    if (keyState.value['d']) camera.position.addScaledVector(right, currentMoveSpeed);
+    if (keyState.value['space']) camera.position.y += currentMoveSpeed;
+    if (keyState.value['shift']) camera.position.y -= currentMoveSpeed;
 
-    camera.value!.rotation.x = Math.max(
-      -Math.PI / 2,
-      Math.min(Math.PI / 2, camera.value!.rotation.x)
-    );
+    camera.rotation.x = Math.max(-Math.PI / 2, Math.min(Math.PI / 2, camera.rotation.x));
 
-    cube.rotation.x += 0.01;
-    cube.rotation.y += 0.01;
+    // Update matrices for all objects
+    scene.updateMatrixWorld(true);
 
-    renderer.render(scene, camera.value!);
+    // Update and render all objects
+    objects.forEach((obj) => {
+      if (obj instanceof LaserTrap) {
+        const group = obj.getCombinedGroup();
+        group.position.set(obj.position.x, obj.position.y, obj.position.z);
+        group.rotation.set(obj.rotation.x, obj.rotation.y, obj.rotation.z);
+        group.scale.set(obj.scale.x, obj.scale.y, obj.scale.z);
+        group.updateMatrix();
+        group.updateMatrixWorld(true);
+      } else {
+        obj.mesh.position.set(obj.position.x, obj.position.y, obj.position.z);
+        obj.mesh.rotation.set(obj.rotation.x, obj.rotation.y, obj.rotation.z);
+        obj.mesh.scale.set(obj.scale.x, obj.scale.y, obj.scale.z);
+        obj.mesh.updateMatrix();
+        obj.mesh.updateMatrixWorld(true);
+      }
+
+      if (obj.update) {
+        obj.update(clock.getDelta());
+      }
+    });
+
+    // Ensure camera matrix is up to date
+    camera.updateMatrixWorld();
+
+    renderer.render(scene, camera);
   };
 
   renderer.setAnimationLoop(animate);
 
   const handleResize = () => {
     renderer.setSize(window.innerWidth, window.innerHeight);
-    camera.value!.aspect = window.innerWidth / window.innerHeight;
-    camera.value!.updateProjectionMatrix();
+    if (camera) {
+      camera.aspect = window.innerWidth / window.innerHeight;
+      camera.updateProjectionMatrix();
+    }
   };
 
   window.addEventListener('resize', handleResize);
@@ -212,9 +271,9 @@ onMounted(() => {
   watch(
     () => settingsStore.fov,
     (newFov) => {
-      if (camera.value) {
-        camera.value.fov = newFov;
-        camera.value.updateProjectionMatrix();
+      if (camera) {
+        camera.fov = newFov;
+        camera.updateProjectionMatrix();
       }
     }
   );
@@ -237,7 +296,7 @@ onMounted(() => {
     <Teleport to="body">
       <ContextMenu ref="contextMenuRef">
         <ContextMenuItem
-          v-for="(item, index) in menuItems"
+          v-for="(item, index) in menuItems.submenu"
           :key="index"
           :label="item.label"
           :icon="item.icon"

@@ -21,3 +21,5 @@ You carefully provide accurate, factual, thoughtful answers, and excel at reason
 - ALWAYS use tailwind for styling. use the latest tailwind features and best practices.
 - Use scss if tailwind is not enough.
 - ALWAYS use v-model for two-way binding.
+- NO 'any' type. Please use specific types.
+- If working with THREE.js NEVER EVER use ref or reactive. Use THREE.js directly because it breaks Vue 3 reactivity.
