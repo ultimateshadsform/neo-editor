@@ -30,7 +30,6 @@ onMounted(() => {
   scene.add(xLabel, yLabel, zLabel);
 
   const animate = () => {
-    requestAnimationFrame(animate);
     renderer.render(scene, camera);
   };
 
