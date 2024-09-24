@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, watch } from 'vue';
+import { ref } from 'vue';
 import { onClickOutside } from '@vueuse/core';
 import { useSettingsStore } from '../stores/settings.store';
 
@@ -15,13 +15,7 @@ const emit = defineEmits<{
 }>();
 
 const localMouseSensitivity = ref(settingsStore.mouseSensitivity);
-
-watch(
-  () => settingsStore.mouseSensitivity,
-  (newValue) => {
-    localMouseSensitivity.value = newValue;
-  }
-);
+const localFov = ref(settingsStore.fov);
 
 const handleClose = () => {
   emit('close');
@@ -29,12 +23,8 @@ const handleClose = () => {
 
 const handleSave = () => {
   settingsStore.updateMouseSensitivity(Number(localMouseSensitivity.value));
+  settingsStore.updateFov(Number(localFov.value));
   handleClose();
-};
-
-const updateLocalSensitivity = (event: Event) => {
-  const target = event.target as HTMLInputElement;
-  localMouseSensitivity.value = Number(target.value);
 };
 </script>
 
@@ -52,15 +42,30 @@ const updateLocalSensitivity = (event: Event) => {
         </label>
         <input
           id="mouseSensitivity"
-          :value="localMouseSensitivity"
-          @input="updateLocalSensitivity"
+          v-model="localMouseSensitivity"
           type="range"
           min="0.001"
           max="0.01"
           step="0.001"
           class="w-full"
         />
-        <span class="text-sm text-gray-500">{{ localMouseSensitivity.toFixed(3) }}</span>
+        <span class="text-sm text-gray-500">{{ Number(localMouseSensitivity).toFixed(3) }}</span>
+      </div>
+
+      <div class="mb-4">
+        <label for="fov" class="block text-sm font-medium text-neutral-800 dark:text-neutral-200">
+          Field of View (FOV)
+        </label>
+        <input
+          id="fov"
+          v-model="localFov"
+          type="range"
+          min="30"
+          max="120"
+          step="1"
+          class="w-full"
+        />
+        <span class="text-sm text-gray-500">{{ localFov }}°</span>
       </div>
 
       <div class="flex justify-end space-x-2">

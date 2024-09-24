@@ -20,3 +20,4 @@ You carefully provide accurate, factual, thoughtful answers, and excel at reason
 - ALWAYS use const syntax for functions instead of function declaration.
 - ALWAYS use tailwind for styling. use the latest tailwind features and best practices.
 - Use scss if tailwind is not enough.
+- ALWAYS use v-model for two-way binding.

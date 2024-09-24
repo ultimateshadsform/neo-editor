@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import * as THREE from 'three';
-import { onMounted, onUnmounted, ref, computed } from 'vue';
+import { onMounted, onUnmounted, ref, computed, watch } from 'vue';
 import { useSettingsStore } from '../stores/settings.store';
 import ContextMenu from './ContextMenu.vue';
 import ContextMenuItem from './ContextMenuItem.vue';
@@ -40,13 +40,19 @@ const toggleSettingsModal = () => {
 };
 
 const cameraQuaternion = ref(new THREE.Quaternion());
+const camera = ref<THREE.PerspectiveCamera | null>(null);
 
 onMounted(() => {
   if (!editor.value) return;
   window.addEventListener('beforeunload', handleBeforeUnload);
 
   const scene = new THREE.Scene();
-  const camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.1, 1000);
+  camera.value = new THREE.PerspectiveCamera(
+    settingsStore.fov,
+    window.innerWidth / window.innerHeight,
+    0.1,
+    1000
+  );
   const renderer = new THREE.WebGLRenderer({ antialias: true });
   renderer.setSize(window.innerWidth, window.innerHeight);
 
@@ -101,7 +107,7 @@ onMounted(() => {
   window.addEventListener('mousemove', handleMouseMove);
   document.addEventListener('pointerlockchange', handlePointerLockChange);
 
-  camera.position.z = 5;
+  camera.value.position.z = 5;
 
   const ambientLight = new THREE.AmbientLight(0xffffff, 0.5);
   scene.add(ambientLight);
@@ -152,48 +158,66 @@ onMounted(() => {
   scene.add(cube2);
 
   const animate = function () {
-    camera.rotation.y = mouseState.x;
-    camera.rotation.order = 'YXZ';
+    camera.value!.rotation.y = mouseState.x;
+    camera.value!.rotation.order = 'YXZ';
 
-    camera.rotation.x = pitch;
+    camera.value!.rotation.x = pitch;
 
     // Update camera quaternion
-    camera.updateMatrixWorld();
-    cameraQuaternion.value.setFromRotationMatrix(camera.matrixWorld);
+    camera.value!.updateMatrixWorld();
+    cameraQuaternion.value.setFromRotationMatrix(camera.value!.matrixWorld);
 
     const forward = new THREE.Vector3(
-      -Math.sin(camera.rotation.y),
+      -Math.sin(camera.value!.rotation.y),
       0,
-      -Math.cos(camera.rotation.y)
+      -Math.cos(camera.value!.rotation.y)
     );
-    const right = new THREE.Vector3(Math.cos(camera.rotation.y), 0, -Math.sin(camera.rotation.y));
+    const right = new THREE.Vector3(
+      Math.cos(camera.value!.rotation.y),
+      0,
+      -Math.sin(camera.value!.rotation.y)
+    );
 
     const currentMoveSpeed = cameraSpeed.value;
 
-    if (keyState.value['w']) camera.position.addScaledVector(forward, currentMoveSpeed);
-    if (keyState.value['s']) camera.position.addScaledVector(forward, -currentMoveSpeed);
-    if (keyState.value['a']) camera.position.addScaledVector(right, -currentMoveSpeed);
-    if (keyState.value['d']) camera.position.addScaledVector(right, currentMoveSpeed);
-    if (keyState.value['space']) camera.position.y += currentMoveSpeed;
-    if (keyState.value['shift']) camera.position.y -= currentMoveSpeed;
+    if (keyState.value['w']) camera.value!.position.addScaledVector(forward, currentMoveSpeed);
+    if (keyState.value['s']) camera.value!.position.addScaledVector(forward, -currentMoveSpeed);
+    if (keyState.value['a']) camera.value!.position.addScaledVector(right, -currentMoveSpeed);
+    if (keyState.value['d']) camera.value!.position.addScaledVector(right, currentMoveSpeed);
+    if (keyState.value['space']) camera.value!.position.y += currentMoveSpeed;
+    if (keyState.value['shift']) camera.value!.position.y -= currentMoveSpeed;
 
-    camera.rotation.x = Math.max(-Math.PI / 2, Math.min(Math.PI / 2, camera.rotation.x));
+    camera.value!.rotation.x = Math.max(
+      -Math.PI / 2,
+      Math.min(Math.PI / 2, camera.value!.rotation.x)
+    );
 
     cube.rotation.x += 0.01;
     cube.rotation.y += 0.01;
 
-    renderer.render(scene, camera);
+    renderer.render(scene, camera.value!);
   };
 
   renderer.setAnimationLoop(animate);
 
   const handleResize = () => {
     renderer.setSize(window.innerWidth, window.innerHeight);
-    camera.aspect = window.innerWidth / window.innerHeight;
-    camera.updateProjectionMatrix();
+    camera.value!.aspect = window.innerWidth / window.innerHeight;
+    camera.value!.updateProjectionMatrix();
   };
 
   window.addEventListener('resize', handleResize);
+
+  // Add a watch effect for FOV changes
+  watch(
+    () => settingsStore.fov,
+    (newFov) => {
+      if (camera.value) {
+        camera.value.fov = newFov;
+        camera.value.updateProjectionMatrix();
+      }
+    }
+  );
 
   onUnmounted(() => {
     window.removeEventListener('beforeunload', handleBeforeUnload);
