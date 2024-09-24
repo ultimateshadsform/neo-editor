@@ -1,19 +1,26 @@
 <script setup lang="ts">
 import * as THREE from 'three';
-import { onMounted, ref, watch } from 'vue';
+import { onMounted, ref, watch, onUnmounted } from 'vue';
 
 const props = defineProps<{
   cameraQuaternion: THREE.Quaternion;
 }>();
 
 const compassContainer = ref<HTMLDivElement | null>(null);
+let scene: THREE.Scene;
+let camera: THREE.PerspectiveCamera;
+let renderer: THREE.WebGLRenderer;
+let axesHelper: THREE.AxesHelper;
+let xLabel: THREE.Sprite;
+let yLabel: THREE.Sprite;
+let zLabel: THREE.Sprite;
 
 onMounted(() => {
   if (!compassContainer.value) return;
 
-  const scene = new THREE.Scene();
-  const camera = new THREE.PerspectiveCamera(50, 1, 0.1, 10);
-  const renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true });
+  scene = new THREE.Scene();
+  camera = new THREE.PerspectiveCamera(50, 1, 0.1, 10);
+  renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true });
 
   renderer.setSize(100, 100);
   compassContainer.value.appendChild(renderer.domElement);
@@ -21,33 +28,35 @@ onMounted(() => {
   camera.position.set(0, 0, 5);
   camera.lookAt(0, 0, 0);
 
-  const axesHelper = new THREE.AxesHelper(2);
+  axesHelper = new THREE.AxesHelper(2);
   scene.add(axesHelper);
 
-  const xLabel = createLabel('X', 2.2, 0, 0, 'red');
-  const yLabel = createLabel('Y', 0, 2.2, 0, 'green');
-  const zLabel = createLabel('Z', 0, 0, 2.2, 'blue');
+  xLabel = createLabel('X', 2.2, 0, 0, 'red');
+  yLabel = createLabel('Y', 0, 2.2, 0, 'green');
+  zLabel = createLabel('Z', 0, 0, 2.2, 'blue');
   scene.add(xLabel, yLabel, zLabel);
 
-  const animate = () => {
-    renderer.render(scene, camera);
-  };
-
   renderer.setAnimationLoop(animate);
-
-  watch(
-    () => props.cameraQuaternion,
-    (newQuaternion) => {
-      axesHelper.quaternion.copy(newQuaternion).invert();
-      xLabel.quaternion.copy(newQuaternion).invert();
-      yLabel.quaternion.copy(newQuaternion).invert();
-      zLabel.quaternion.copy(newQuaternion).invert();
-    },
-    { deep: true }
-  );
 });
 
-function createLabel(text: string, x: number, y: number, z: number, color: string) {
+const animate = () => {
+  updateCompass();
+  renderer.render(scene, camera);
+};
+
+const updateCompass = () => {
+  if (axesHelper && xLabel && yLabel && zLabel) {
+    const inverseQuaternion = props.cameraQuaternion.clone().invert();
+    axesHelper.quaternion.copy(inverseQuaternion);
+    xLabel.quaternion.copy(inverseQuaternion);
+    yLabel.quaternion.copy(inverseQuaternion);
+    zLabel.quaternion.copy(inverseQuaternion);
+  }
+};
+
+watch(() => props.cameraQuaternion, updateCompass, { deep: true });
+
+function createLabel(text: string, x: number, y: number, z: number, color: string): THREE.Sprite {
   const canvas = document.createElement('canvas');
   const context = canvas.getContext('2d')!;
   canvas.width = 64;
@@ -65,6 +74,11 @@ function createLabel(text: string, x: number, y: number, z: number, color: strin
 
   return sprite;
 }
+
+onUnmounted(() => {
+  renderer.setAnimationLoop(null);
+  compassContainer.value?.removeChild(renderer.domElement);
+});
 </script>
 
 <template>

@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import * as THREE from 'three';
 import type { SceneObject } from '@/types/sceneTypes';
-import { onMounted, onUnmounted, ref, computed, watch } from 'vue';
+import { onMounted, onUnmounted, ref, computed, watch, reactive } from 'vue';
 import { useSettingsStore } from '../stores/settings.store';
 import { createMenuItems } from '../ts/menu';
 import { LaserTrap } from '@/ts/neogame/objects';
@@ -44,7 +44,7 @@ const toggleSettingsModal = () => {
   showSettingsModal.value = !showSettingsModal.value;
 };
 
-const cameraQuaternion = new THREE.Quaternion();
+const cameraQuaternion = reactive(new THREE.Quaternion());
 let camera: THREE.PerspectiveCamera | null = null;
 let scene: THREE.Scene | null = null;
 const objects: SceneObject[] = [];
@@ -206,7 +206,7 @@ onMounted(() => {
 
     // Update camera quaternion
     camera.updateMatrixWorld();
-    cameraQuaternion.setFromRotationMatrix(camera.matrixWorld);
+    cameraQuaternion.copy(camera.quaternion);
 
     const forward = new THREE.Vector3(
       -Math.sin(camera.rotation.y),
@@ -240,8 +240,6 @@ onMounted(() => {
         group.updateMatrixWorld(true);
       } else {
         obj.mesh.position.copy(obj.position);
-        // Remove this line as we're updating the rotation in the update function
-        // obj.mesh.rotation.copy(obj.rotation);
         obj.mesh.scale.copy(obj.scale);
         obj.mesh.updateMatrix();
         obj.mesh.updateMatrixWorld(true);
