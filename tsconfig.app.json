@@ -5,11 +5,14 @@
   "compilerOptions": {
     "composite": true,
     "tsBuildInfoFile": "./node_modules/.tmp/tsconfig.app.tsbuildinfo",
-
+    
     "baseUrl": ".",
     "paths": {
       "@/*": ["./src/*"],
       "@icons/*": ["./src/assets/icons/*"]
-    }
+    },
+    "types": [
+      "@tresjs/core/types"
+    ]
   }
 }
